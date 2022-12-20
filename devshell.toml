@@ -2,7 +2,7 @@
 [devshell]
 packages = [
          "cargo",
-         "llvm",
+         "llvmPackages.clangUseLLVM",
          "rust-analyzer",
          "rustc"
 ]
