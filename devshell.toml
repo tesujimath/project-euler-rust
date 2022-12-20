@@ -3,8 +3,10 @@
 packages = [
          "cargo",
          "llvmPackages.clangUseLLVM",
+         "clippy",
          "rust-analyzer",
-         "rustc"
+         "rustc",
+         "rustfmt"
 ]
 
 [[commands]]
