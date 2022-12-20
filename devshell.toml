@@ -2,8 +2,10 @@
 [devshell]
 packages = [
          "cargo",
-         "llvmPackages.clangUseLLVM",
          "clippy",
+         "lldb_9",
+         "llvmPackages_9.clangUseLLVM",
+         "nodejs",  # for dap-mode debugger (confirm later whether it really is)
          "rust-analyzer",
          "rustc",
          "rustfmt"
