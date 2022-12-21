@@ -3,12 +3,14 @@
 packages = [
          "cargo",
          "clippy",
+         "gdb",
          "lldb_9",
          "llvmPackages_9.clangUseLLVM",
-         "nodejs",  # for dap-mode debugger (confirm later whether it really is)
+         "nodejs-16_x",  # for dap-mode debugger (confirm later whether it really is)
          "rust-analyzer",
          "rustc",
-         "rustfmt"
+         "rustfmt",
+         #"vscode-extensions.llvm-org.lldb-vscode" # for dap-mode debugger lldb
 ]
 
 [[commands]]
