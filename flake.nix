@@ -10,6 +10,7 @@
         let pkgs = import nixpkgs {
           inherit system;
 
+          config = { allowUnfree = true; };
           overlays = [ devshell.overlay ];
         };
         in

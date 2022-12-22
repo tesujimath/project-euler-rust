@@ -8,6 +8,7 @@ packages = [
          "rust-analyzer",
          "rustc",
          "rustfmt",
+         "vscode-extensions.ms-vscode.cpptools",
 ]
 
 [[commands]]
