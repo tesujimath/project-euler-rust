@@ -1,14 +1,15 @@
+use std::env;
+use std::str::FromStr;
+
+mod p1;
+
 fn main() {
-    p1()
-}
+    let problems = [p1::run];
 
-fn p1() {
-    let mut sum = 0;
+    for arg in env::args().skip(1) {
+        let i = usize::from_str(&arg).expect("expected problem number");
 
-    for i in 1..1000 {
-        if i % 3 == 0 || i % 5 == 0 {
-            sum += i;
-        }
+        println!("problem {}", i);
+        problems[i - 1]();
     }
-    println!("p1: sum is {}", sum);
 }
