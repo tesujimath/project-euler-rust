@@ -21,11 +21,6 @@ pub fn run() {
     let fib = Fib(1, 2);
     const MAX: i32 = 4_000_000;
 
-    let sum: i32 = fib
-        //.inspect(|n| println!("all {}", n))
-        .filter(|n| n.is_even())
-        //.inspect(|n| println!("even {}", n))
-        .take_while(|n| n <= &MAX)
-        .sum();
+    let sum: i32 = fib.filter(|n| n.is_even()).take_while(|n| n <= &MAX).sum();
     println!("p2: sum is {}", sum);
 }
