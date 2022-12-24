@@ -1,3 +1,4 @@
+use num::Integer;
 use std::ops::Add;
 
 struct Fib<T>(T, T);
@@ -16,17 +17,13 @@ where
     }
 }
 
-fn is_even(n: &i32) -> bool {
-    n % 2 == 0
-}
-
 pub fn run() {
     let fib = Fib(1, 2);
     const MAX: i32 = 4_000_000;
 
     let sum: i32 = fib
         //.inspect(|n| println!("all {}", n))
-        .filter(is_even)
+        .filter(|n| n.is_even())
         //.inspect(|n| println!("even {}", n))
         .take_while(|n| n <= &MAX)
         .sum();
