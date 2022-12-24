@@ -33,11 +33,26 @@ impl Iterator for Sieve {
     }
 }
 
-pub fn run() {
-    let s = Sieve::new();
+fn factors(m: u64) -> Vec<u64> {
+    let mut n = m;
+    let sieve = &mut Sieve::new();
+    let mut f = Vec::<u64>::new();
 
-    for p in s.take(20) {
-        println!("{}", p);
+    while let Some(p) = sieve.next() {
+        while n % p == 0 {
+            f.push(p);
+            n /= p;
+
+            if n == 1 {
+                return f;
+            }
+        }
     }
-    //println!("p3: {:?}", s);
+
+    f
+}
+
+pub fn run() {
+    let f = factors(600851475143u64);
+    println!("p3: {}", f.last().unwrap());
 }
