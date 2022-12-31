@@ -2,6 +2,7 @@
 [devshell]
 packages = [
          "cargo",
+         "cargo-flamegraph",
          "clippy",
          "gcc",
          "gdb",
