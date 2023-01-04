@@ -19,3 +19,4 @@ mod p4;
 mod primes;
 
 mod bigprimes;
+mod genprimes;
