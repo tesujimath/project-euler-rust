@@ -31,20 +31,20 @@ where
 #[gat]
 impl<T> LendingIterator for Sieve<T>
 where
-    T: Zero + FromPrimitive + AddAssign<u8>,
-    for<'a> &'a T: Rem<Output = T> + Add<u8, Output = T>,
+    T: Zero + FromPrimitive + AddAssign,
+    for<'a> &'a T: Rem<Output = T> + Add<Output = T>,
 {
     type Item<'next> = &'next T;
 
     fn next(&mut self) -> Option<&T> {
         let mut candidate = match self.primes.len() {
-            0 => T::from_i32(2).unwrap(),
-            1 => T::from_i32(3).unwrap(),
-            _ => self.primes.last().unwrap() + 2u8,
+            0 => T::from_u8(2u8).unwrap(),
+            1 => T::from_u8(3u8).unwrap(),
+            _ => self.primes.last().unwrap() + &T::from_u8(2u8).unwrap(),
         };
 
         while !self.is_prime(&candidate) {
-            candidate += 2u8;
+            candidate += T::from_u8(2u8).unwrap();
         }
 
         self.primes.push(candidate);
@@ -55,8 +55,8 @@ where
 
 pub fn factors<T>(m: &T) -> Vec<T>
 where
-    for<'a> T: Zero + FromPrimitive + AddAssign<u8> + Clone + DivAssign<&'a T> + One + PartialEq,
-    for<'a> &'a T: Rem<Output = T> + Add<u8, Output = T>,
+    for<'a> T: Zero + FromPrimitive + AddAssign + Clone + DivAssign<&'a T> + One + PartialEq,
+    for<'a> &'a T: Rem<Output = T> + Add<Output = T>,
 {
     let mut n = (*m).clone();
     let sieve = &mut Sieve::new();
@@ -79,9 +79,17 @@ where
 #[test]
 fn test_factors() {
     use num::BigUint;
-    let n = BigUint::parse_bytes(b"123456789123456789", 10).unwrap();
+    let n = BigUint::parse_bytes(b"123456789", 10).unwrap();
     let f = factors(&n);
+    let p: BigUint = f.iter().product();
+    assert_eq!(n, p);
+}
 
-    println!("Factorised {:?} into {} factors: {:?}", n, f.len(), f);
-    assert!(!f.is_empty());
+proptest! {
+    #[test]
+    fn factors_multiply_to_factorand(n in 1..9999u32) {
+        let f = factors(&n);
+        let p = f.iter().product();
+        assert_eq!(n, p);
+    }
 }

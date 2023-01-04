@@ -1,3 +1,6 @@
+#[macro_use]
+extern crate proptest;
+
 use std::env;
 use std::str::FromStr;
 

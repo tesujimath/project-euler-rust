@@ -63,7 +63,7 @@ pub fn factors(m: &BigUint) -> Vec<BigUint> {
 
 #[test]
 fn test_factors() {
-    let n = BigUint::parse_bytes(b"123456789123456789", 10).unwrap();
+    let n = BigUint::parse_bytes(b"123456789", 10).unwrap();
     let f = factors(&n);
 
     println!("Factorised {:?} into {} factors: {:?}", n, f.len(), f);
