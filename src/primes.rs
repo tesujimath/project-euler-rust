@@ -1,5 +1,5 @@
 #[derive(Debug)]
-struct Sieve {
+pub struct Sieve {
     primes: Vec<u64>,
 }
 

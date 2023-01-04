@@ -1,18 +1,53 @@
 #[macro_use]
 extern crate proptest;
 
+use clap::Parser;
+use lending_iterator::LendingIterator;
 use std::env;
+use std::iter::Iterator;
+use std::process::ExitCode;
 use std::str::FromStr;
 
-fn main() {
+#[derive(Parser)]
+struct Cli {
+    #[arg(short, long)]
+    problem: Option<usize>,
+
+    #[arg(long)]
+    sieve_u64: Option<usize>,
+
+    #[arg(long)]
+    sieve_u64g: Option<usize>,
+}
+
+fn main() -> ExitCode {
+    let cli = Cli::parse();
     let problems = [p1::run, p2::run, p3::run, p4::run];
 
-    for arg in env::args().skip(1) {
-        let i = usize::from_str(&arg).expect("expected problem number");
+    if let Some(p) = cli.problem {
+        if let Some(f) = problems.get(p - 1) {
+            f()
+        } else {
+            println!("problem index {} out of bounds 1..{}", p, problems.len());
 
-        println!("problem {}", i);
-        problems[i - 1]();
+            return ExitCode::FAILURE;
+        }
     }
+
+    if let Some(n) = cli.sieve_u64 {
+        let mut sieve = primes::Sieve::new();
+        let p = sieve.nth(n);
+        println!("{}th prime from u64 is {:?}", n, p);
+    }
+
+    // TODO my LendingIterator does not skip over any values 🤷
+    if let Some(n) = cli.sieve_u64g {
+        let mut sieve: genprimes::Sieve<u64> = genprimes::Sieve::new();
+        let p = sieve.nth(n);
+        println!("{}th prime from u64g is {:?}", n, p);
+    }
+
+    ExitCode::SUCCESS
 }
 
 mod p1;

@@ -10,7 +10,7 @@ use std::ops::DivAssign;
 use std::ops::Rem;
 
 #[derive(Debug)]
-struct Sieve<T> {
+pub struct Sieve<T> {
     primes: Vec<T>,
 }
 
@@ -21,6 +21,10 @@ where
 {
     pub fn new() -> Sieve<T> {
         Sieve { primes: Vec::new() }
+    }
+
+    pub fn len(&self) -> usize {
+        self.primes.len()
     }
 
     fn is_prime(&self, n: &T) -> bool {
