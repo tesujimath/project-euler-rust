@@ -23,7 +23,17 @@ impl FixedSieve {
 
     /// Returns whether `n` is coprime with respect to `self.primes`
     fn is_coprime(&self, n: u64) -> bool {
-        self.primes.iter().all(|p| n % p != 0)
+        let n_bits = n.bits();
+        for p in self.primes.iter() {
+            if p.bits() * 2 > n_bits + 1 {
+                return true;
+            }
+
+            if (n % *p).is_zero() {
+                return false;
+            }
+        }
+        true
     }
 
     /// Generates next prime and returns it.
@@ -94,7 +104,17 @@ impl BigSieve {
 
     /// Returns whether `n` is coprime with respect to `self.primes`
     fn is_coprime(&self, n: &BigUint) -> bool {
-        self.primes.iter().all(|p| !(n % p).is_zero())
+        let n_bits = n.bits();
+        for p in self.primes.iter() {
+            if p.bits() * 2 > n_bits + 1 {
+                return true;
+            }
+
+            if (n % p).is_zero() {
+                return false;
+            }
+        }
+        true
     }
 
     /// Generates next prime and returns it.
