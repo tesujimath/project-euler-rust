@@ -17,7 +17,7 @@ impl Sieve {
         self.primes.len()
     }
 
-    fn is_prime(&self, n: &BigUint) -> bool {
+    fn is_coprime(&self, n: &BigUint) -> bool {
         self.primes.iter().all(|p| !(n % p).is_zero())
     }
 
@@ -30,7 +30,7 @@ impl Sieve {
                 _ => self.primes.last().unwrap() + &BigUint::from_u8(2u8).unwrap(),
             };
 
-            while !self.is_prime(&candidate) {
+            while !self.is_coprime(&candidate) {
                 candidate += BigUint::from_u8(2u8).unwrap();
             }
 

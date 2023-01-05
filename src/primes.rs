@@ -8,7 +8,7 @@ impl Sieve {
         Sieve { primes: Vec::new() }
     }
 
-    fn is_prime(&self, n: u64) -> bool {
+    fn is_coprime(&self, n: u64) -> bool {
         self.primes.iter().all(|p| n % p != 0)
     }
 
@@ -21,7 +21,7 @@ impl Sieve {
                 _ => self.primes.last().unwrap() + 2,
             };
 
-            while !self.is_prime(candidate) {
+            while !self.is_coprime(candidate) {
                 candidate += 2;
             }
 

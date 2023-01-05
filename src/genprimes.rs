@@ -1,3 +1,4 @@
+use super::bits_trait::Bits;
 use num::FromPrimitive;
 use num::One;
 use num::Zero;
@@ -6,7 +7,6 @@ use std::ops::Add;
 use std::ops::AddAssign;
 use std::ops::DivAssign;
 use std::ops::Rem;
-use super::bits_trait::Bits;
 
 #[derive(Debug)]
 pub struct Sieve<T> {
@@ -26,7 +26,7 @@ where
         self.primes.len()
     }
 
-    fn is_prime(&self, n: &T) -> bool {
+    fn is_coprime(&self, n: &T) -> bool {
         let n_bits = n.bits();
         for p in self.primes.iter() {
             //println!("p {:?} with {} bits, n {:?} with {} bits", p, p.bits(), n, n_bits);
@@ -51,7 +51,7 @@ where
                 _ => self.primes.last().unwrap() + &T::from_u8(2u8).unwrap(),
             };
 
-            while !self.is_prime(&candidate) {
+            while !self.is_coprime(&candidate) {
                 candidate += T::from_u8(2u8).unwrap();
             }
 
@@ -68,7 +68,15 @@ where
 
 pub fn factors<T>(m: &T) -> Vec<T>
 where
-    for<'a> T: Zero + FromPrimitive + AddAssign + Bits + Clone + DivAssign<&'a T> + One + PartialEq + Debug,
+    for<'a> T: Zero
+        + FromPrimitive
+        + AddAssign
+        + Bits
+        + Clone
+        + DivAssign<&'a T>
+        + One
+        + PartialEq
+        + Debug,
     for<'a> &'a T: Rem<Output = T> + Add<Output = T>,
 {
     let mut n = (*m).clone();
