@@ -163,7 +163,15 @@ pub struct RefSieve<T> {
 
 impl<T> RefSieve<T>
 where
-    T: Zero + FromPrimitive + AddAssign + Bits + Debug,
+    for<'a> T: Zero
+        + FromPrimitive
+        + AddAssign
+        + Bits
+        + Clone
+        + DivAssign<&'a T>
+        + One
+        + PartialEq
+        + Debug,
     for<'a> &'a T: Rem<Output = T> + Add<Output = T>,
 {
     pub fn new() -> RefSieve<T> {
@@ -174,8 +182,6 @@ where
     fn is_coprime(&self, n: &T) -> bool {
         let n_bits = n.bits();
         for p in self.primes.iter() {
-            //println!("p {:?} with {} bits, n {:?} with {} bits", p, p.bits(), n, n_bits);
-
             if p.bits() * 2 > n_bits + 1 {
                 return true;
             }
@@ -214,19 +220,7 @@ where
     }
 
     /// Returns factors of `m`, generating primes as required.
-    pub fn factors(&mut self, m: &T) -> Vec<T>
-    where
-        for<'a> T: Zero
-            + FromPrimitive
-            + AddAssign
-            + Bits
-            + Clone
-            + DivAssign<&'a T>
-            + One
-            + PartialEq
-            + Debug,
-        for<'a> &'a T: Rem<Output = T> + Add<Output = T>,
-    {
+    pub fn factors(&mut self, m: &T) -> Vec<T> {
         let mut n = (*m).clone();
         let mut f = Vec::<T>::new();
 
@@ -247,7 +241,7 @@ where
 }
 
 #[test]
-fn test_RefSieve_factors() {
+fn test_ref_sieve_factors() {
     use num::BigUint;
     let s = &mut RefSieve::new();
     let n = BigUint::parse_bytes(b"123456789", 10).unwrap();
@@ -276,6 +270,125 @@ fn test_ref_sieve_generic_against_primitive() {
         let pg = sieve_g.get(i);
 
         assert_eq!(pp, *pg);
+    }
+}
+
+/// Naive generic Sieve of Eratosthenes returning values,
+/// supporting both primitive integers only.
+#[derive(Debug)]
+pub struct Sieve<T> {
+    primes: Vec<T>,
+}
+
+impl<T> Sieve<T>
+where
+    T: Copy
+        + Zero
+        + FromPrimitive
+        + Add
+        + Rem<Output = T>
+        + AddAssign
+        + Bits
+        + DivAssign
+        + One
+        + PartialEq
+        + Debug,
+{
+    pub fn new() -> Sieve<T> {
+        Sieve { primes: Vec::new() }
+    }
+
+    /// Returns whether `n` is coprime with respect to `self.primes`
+    fn is_coprime(&self, n: T) -> bool {
+        let n_bits = n.bits();
+        for p in self.primes.iter() {
+            if p.bits() * 2 > n_bits + 1 {
+                return true;
+            }
+
+            if (n % *p).is_zero() {
+                return false;
+            }
+        }
+        true
+    }
+
+    /// Generates next prime and returns it.
+    pub fn generate(&mut self) -> T {
+        let mut candidate = match self.primes.len() {
+            0 => T::from_u8(2u8).unwrap(),
+            1 => T::from_u8(3u8).unwrap(),
+            _ => *self.primes.last().unwrap() + T::from_u8(2u8).unwrap(),
+        };
+
+        while !self.is_coprime(candidate) {
+            candidate += T::from_u8(2u8).unwrap();
+        }
+
+        self.primes.push(candidate);
+
+        *self.primes.last().unwrap()
+    }
+
+    /// Gets zero-based `i`th prime, generating as many intermediate primes as are required.
+    pub fn get(&mut self, i: usize) -> T {
+        while self.primes.len() <= i {
+            let _ = self.generate();
+        }
+
+        *self.primes.get(i).unwrap()
+    }
+
+    /// Returns factors of `m`, generating primes as required.
+    pub fn factors(&mut self, m: T) -> Vec<T> {
+        let mut n = m;
+        let mut f = Vec::<T>::new();
+
+        for i in 0usize.. {
+            let p = self.get(i);
+            while (n % p).is_zero() {
+                f.push(p.clone());
+                n /= p;
+            }
+
+            if n.is_one() {
+                break;
+            }
+        }
+
+        f
+    }
+}
+
+#[test]
+fn test_sieve_factors() {
+    let s = &mut Sieve::new();
+    let n = 123456789_u64;
+    let f = s.factors(n);
+    let p = f.iter().product();
+    assert_eq!(n, p);
+}
+
+proptest! {
+    #[test]
+    fn test_sieve_factors_multiply_to_factorand(n in 1..9999u32) {
+        let s = &mut Sieve::new();
+        let f = s.factors(n);
+        let p = f.iter().product();
+        assert_eq!(n, p);
+    }
+}
+
+#[test]
+fn test_sieve_generic_against_primitive() {
+    let mut sieve_p = super::primes::FixedSieve::new();
+    let mut sieve_g: Sieve<u64> = Sieve::new();
+
+    for i in 0..1000 {
+        let pp = sieve_p.get(i);
+        let pg = sieve_g.get(i);
+
+        assert_eq!(pp, pg);
     }
 }
 
