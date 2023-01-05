@@ -1,10 +1,12 @@
 use num::FromPrimitive;
 use num::One;
 use num::Zero;
+use std::fmt::Debug;
 use std::ops::Add;
 use std::ops::AddAssign;
 use std::ops::DivAssign;
 use std::ops::Rem;
+use super::bits_trait::Bits;
 
 #[derive(Debug)]
 pub struct Sieve<T> {
@@ -13,7 +15,7 @@ pub struct Sieve<T> {
 
 impl<T> Sieve<T>
 where
-    T: Zero + FromPrimitive + AddAssign,
+    T: Zero + FromPrimitive + AddAssign + Bits + Debug,
     for<'a> &'a T: Rem<Output = T> + Add<Output = T>,
 {
     pub fn new() -> Sieve<T> {
@@ -25,7 +27,19 @@ where
     }
 
     fn is_prime(&self, n: &T) -> bool {
-        self.primes.iter().all(|p| !(n % p).is_zero())
+        let n_bits = n.bits();
+        for p in self.primes.iter() {
+            //println!("p {:?} with {} bits, n {:?} with {} bits", p, p.bits(), n, n_bits);
+
+            if p.bits() * 2 > n_bits + 1 {
+                return true;
+            }
+
+            if (n % p).is_zero() {
+                return false;
+            }
+        }
+        true
     }
 
     pub fn generate(&mut self, n: usize) -> &T {
@@ -54,7 +68,7 @@ where
 
 pub fn factors<T>(m: &T) -> Vec<T>
 where
-    for<'a> T: Zero + FromPrimitive + AddAssign + Clone + DivAssign<&'a T> + One + PartialEq,
+    for<'a> T: Zero + FromPrimitive + AddAssign + Bits + Clone + DivAssign<&'a T> + One + PartialEq + Debug,
     for<'a> &'a T: Rem<Output = T> + Add<Output = T>,
 {
     let mut n = (*m).clone();
@@ -87,5 +101,18 @@ proptest! {
         let f = factors(&n);
         let p = f.iter().product();
         assert_eq!(n, p);
+    }
+}
+
+#[test]
+fn test_generic_against_primitive() {
+    let mut sieve_p = super::primes::Sieve::new();
+    let mut sieve_g: Sieve<u64> = Sieve::new();
+
+    for i in 1..1000 {
+        let pp = sieve_p.generate(1);
+        let pg = sieve_g.generate(1);
+
+        assert_eq!(pp, *pg);
     }
 }

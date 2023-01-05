@@ -11,25 +11,32 @@ impl Sieve {
     fn is_prime(&self, n: u64) -> bool {
         self.primes.iter().all(|p| n % p != 0)
     }
+
+    pub fn generate(&mut self, n: usize) -> u64 {
+        assert!(n > 0);
+        for _ in 0..n {
+            let mut candidate = match self.primes.len() {
+                0 => 2,
+                1 => 3,
+                _ => self.primes.last().unwrap() + 2,
+            };
+
+            while !self.is_prime(candidate) {
+                candidate += 2;
+            }
+
+            self.primes.push(candidate);
+        }
+
+        *self.primes.last().unwrap()
+    }
 }
 
 impl Iterator for Sieve {
     type Item = u64;
 
     fn next(&mut self) -> Option<u64> {
-        let mut candidate = match self.primes.last() {
-            None => 2,
-            Some(2) => 3,
-            Some(p) => p + 2,
-        };
-
-        while !self.is_prime(candidate) {
-            candidate += 2;
-        }
-
-        self.primes.push(candidate);
-
-        Some(candidate)
+        Some(self.generate(1))
     }
 }
 

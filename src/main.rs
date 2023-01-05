@@ -25,6 +25,12 @@ struct Cli {
 
     #[arg(long)]
     sieve_bg: Option<usize>,
+
+    #[arg(long)]
+    genprimes: Option<usize>,
+
+    #[arg(long)]
+    primes: Option<usize>,
 }
 
 fn main() -> ExitCode {
@@ -41,7 +47,8 @@ fn main() -> ExitCode {
         }
     } else if let Some(n) = cli.sieve_u64 {
         let mut sieve = primes::Sieve::new();
-        let p = sieve.nth(n);
+        let p = sieve.generate(n);
+        //        let p = sieve.nth(n);
         println!(
             "{}th prime from u64 is {:?}",
             n, p
@@ -62,6 +69,16 @@ fn main() -> ExitCode {
         let mut sieve: genprimes::Sieve<BigUint> = genprimes::Sieve::new();
         let p = sieve.generate(n);
         println!("{}th prime from bg is {:?}", n, p);
+    } else if let Some(n) = cli.genprimes {
+        let mut sieve: genprimes::Sieve<u64> = genprimes::Sieve::new();
+        for _ in 0..n {
+            println!("{:?}", sieve.generate(1));
+        }
+    } else if let Some(n) = cli.primes {
+        let mut sieve = primes::Sieve::new();
+        for _ in 0..n {
+            println!("{:?}", sieve.generate(1));
+        }
     } else {
         println!("default run target");
         let mut sieve: genprimes::Sieve<u64> = genprimes::Sieve::new();
@@ -88,3 +105,4 @@ mod primes;
 
 mod bigprimes;
 mod genprimes;
+mod bits_trait;
