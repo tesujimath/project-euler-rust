@@ -8,7 +8,6 @@ pub trait Bits {
 
 impl Bits for BigUint {
     fn bits(&self) -> usize {
-        println!("this is bits for BigUint");
         self.bits() as usize
     }
 }
