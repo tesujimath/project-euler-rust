@@ -2,9 +2,8 @@
 extern crate proptest;
 
 use clap::Parser;
-use std::iter::Iterator;
-use std::process::ExitCode;
 use num::BigUint;
+use std::process::ExitCode;
 
 #[derive(Parser)]
 struct Cli {
@@ -46,47 +45,44 @@ fn main() -> ExitCode {
             return ExitCode::FAILURE;
         }
     } else if let Some(n) = cli.sieve_u64 {
-        let mut sieve = primes::Sieve::new();
-        let p = sieve.generate(n);
-        //        let p = sieve.nth(n);
-        println!(
-            "{}th prime from u64 is {:?}",
-            n, p
-        );
+        let mut sieve = primes::FixedSieve::new();
+        let p = sieve.get(n);
+        println!("{}th prime from u64 is {:?}", n, p);
     } else if let Some(n) = cli.sieve_b {
-        let mut sieve = bigprimes::Sieve::new();
-        let p = sieve.generate(n);
+        let mut sieve = primes::BigSieve::new();
+        let p = sieve.get(n);
         println!("{}th prime from b is {:?}", n, p);
     } else if let Some(n) = cli.sieve_u64g {
-        let mut sieve: genprimes::Sieve<u64> = genprimes::Sieve::new();
-        let p = sieve.generate(n);
+        let mut sieve: primes::RefSieve<u64> = primes::RefSieve::new();
+        let p = sieve.get(n);
         println!("{}th prime from u64g is {:?}", n, p);
     } else if let Some(n) = cli.sieve_u128g {
-        let mut sieve: genprimes::Sieve<u128> = genprimes::Sieve::new();
-        let p = sieve.generate(n);
+        let mut sieve: primes::RefSieve<u128> = primes::RefSieve::new();
+        let p = sieve.get(n);
         println!("{}th prime from u128g is {:?}", n, p);
     } else if let Some(n) = cli.sieve_bg {
-        let mut sieve: genprimes::Sieve<BigUint> = genprimes::Sieve::new();
-        let p = sieve.generate(n);
+        let mut sieve: primes::RefSieve<BigUint> = primes::RefSieve::new();
+        let p = sieve.get(n);
         println!("{}th prime from bg is {:?}", n, p);
     } else if let Some(n) = cli.genprimes {
-        let mut sieve: genprimes::Sieve<u64> = genprimes::Sieve::new();
-        for _ in 0..n {
-            println!("{:?}", sieve.generate(1));
+        let mut sieve: primes::RefSieve<u64> = primes::RefSieve::new();
+        for i in 0..n {
+            println!("{:?}", sieve.get(i));
         }
     } else if let Some(n) = cli.primes {
-        let mut sieve = primes::Sieve::new();
+        let mut sieve = primes::FixedSieve::new();
         for _ in 0..n {
-            println!("{:?}", sieve.generate(1));
+            let p = sieve.generate();
+            println!("{}", p);
         }
     } else {
         println!("default run target");
-        let mut sieve: genprimes::Sieve<u64> = genprimes::Sieve::new();
-        for _ in 0..10 {
-            println!("{:?}", sieve.generate(1));
+        let mut sieve: primes::RefSieve<u64> = primes::RefSieve::new();
+        for i in 0..10 {
+            println!("{:?}", sieve.get(i));
         }
-        sieve.generate(100);
-        println!("{:?}", sieve.last());
+        let p = sieve.get(100);
+        println!("{:?}", p);
         //let mut s0 = sieve.skip(5_usize);
         //let mut s1 = s0.skip(1_usize);
         //let mut s2 = s1.skip(1_usize);
@@ -101,8 +97,5 @@ mod p1;
 mod p2;
 mod p3;
 mod p4;
-mod primes;
 
-mod bigprimes;
-mod genprimes;
-mod bits_trait;
+mod primes;

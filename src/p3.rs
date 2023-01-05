@@ -1,6 +1,7 @@
-use super::primes::factors;
+use super::primes::FixedSieve;
 
 pub fn run() {
-    let f = factors(600851475143u64);
+    let mut s = FixedSieve::new();
+    let f = s.factors(600851475143u64);
     println!("p3: {}", f.last().unwrap());
 }
