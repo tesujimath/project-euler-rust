@@ -1,13 +1,10 @@
-use lending_iterator::gat;
-use lending_iterator::prelude::*;
-use lending_iterator::LendingIterator;
 use num::BigUint;
 use num::FromPrimitive;
 use num::One;
 use num::Zero;
 
 #[derive(Debug)]
-struct Sieve {
+pub struct Sieve {
     primes: Vec<BigUint>,
 }
 
@@ -16,28 +13,34 @@ impl Sieve {
         Sieve { primes: Vec::new() }
     }
 
+    pub fn len(&self) -> usize {
+        self.primes.len()
+    }
+
     fn is_prime(&self, n: &BigUint) -> bool {
         self.primes.iter().all(|p| !(n % p).is_zero())
     }
-}
 
-#[gat]
-impl LendingIterator for Sieve {
-    type Item<'next> = &'next BigUint;
+    pub fn generate(&mut self, n: usize) -> &BigUint {
+        assert!(n > 0);
+        for _ in 0..n {
+            let mut candidate = match self.primes.len() {
+                0 => BigUint::from_u8(2u8).unwrap(),
+                1 => BigUint::from_u8(3u8).unwrap(),
+                _ => self.primes.last().unwrap() + &BigUint::from_u8(2u8).unwrap(),
+            };
 
-    fn next(&mut self) -> Option<&BigUint> {
-        let mut candidate = match self.primes.len() {
-            0 => BigUint::from_i32(2).unwrap(),
-            1 => BigUint::from_i32(3).unwrap(),
-            _ => self.primes.last().unwrap() + 2u8,
-        };
+            while !self.is_prime(&candidate) {
+                candidate += BigUint::from_u8(2u8).unwrap();
+            }
 
-        while !self.is_prime(&candidate) {
-            candidate += 2u8;
+            self.primes.push(candidate);
         }
 
-        self.primes.push(candidate);
+        self.primes.last().unwrap()
+    }
 
+    pub fn last(&self) -> Option<&BigUint> {
         self.primes.last()
     }
 }
@@ -47,14 +50,11 @@ pub fn factors(m: &BigUint) -> Vec<BigUint> {
     let sieve = &mut Sieve::new();
     let mut f = Vec::<BigUint>::new();
 
-    while let Some(p) = sieve.next() {
+    while !n.is_one() {
+        let p = sieve.generate(1);
         while (&n % p).is_zero() {
             f.push(p.clone());
             n /= p;
-
-            if n.is_one() {
-                return f;
-            }
         }
     }
 

@@ -1,6 +1,3 @@
-use lending_iterator::gat;
-use lending_iterator::prelude::*;
-use lending_iterator::LendingIterator;
 use num::FromPrimitive;
 use num::One;
 use num::Zero;
@@ -16,8 +13,8 @@ pub struct Sieve<T> {
 
 impl<T> Sieve<T>
 where
-    T: Zero,
-    for<'a> &'a T: Rem<Output = T>,
+    T: Zero + FromPrimitive + AddAssign,
+    for<'a> &'a T: Rem<Output = T> + Add<Output = T>,
 {
     pub fn new() -> Sieve<T> {
         Sieve { primes: Vec::new() }
@@ -30,29 +27,27 @@ where
     fn is_prime(&self, n: &T) -> bool {
         self.primes.iter().all(|p| !(n % p).is_zero())
     }
-}
 
-#[gat]
-impl<T> LendingIterator for Sieve<T>
-where
-    T: Zero + FromPrimitive + AddAssign,
-    for<'a> &'a T: Rem<Output = T> + Add<Output = T>,
-{
-    type Item<'next> = &'next T;
+    pub fn generate(&mut self, n: usize) -> &T {
+        assert!(n > 0);
+        for _ in 0..n {
+            let mut candidate = match self.primes.len() {
+                0 => T::from_u8(2u8).unwrap(),
+                1 => T::from_u8(3u8).unwrap(),
+                _ => self.primes.last().unwrap() + &T::from_u8(2u8).unwrap(),
+            };
 
-    fn next(&mut self) -> Option<&T> {
-        let mut candidate = match self.primes.len() {
-            0 => T::from_u8(2u8).unwrap(),
-            1 => T::from_u8(3u8).unwrap(),
-            _ => self.primes.last().unwrap() + &T::from_u8(2u8).unwrap(),
-        };
+            while !self.is_prime(&candidate) {
+                candidate += T::from_u8(2u8).unwrap();
+            }
 
-        while !self.is_prime(&candidate) {
-            candidate += T::from_u8(2u8).unwrap();
+            self.primes.push(candidate);
         }
 
-        self.primes.push(candidate);
+        self.primes.last().unwrap()
+    }
 
+    pub fn last(&self) -> Option<&T> {
         self.primes.last()
     }
 }
@@ -66,14 +61,11 @@ where
     let sieve = &mut Sieve::new();
     let mut f = Vec::<T>::new();
 
-    while let Some(p) = sieve.next() {
+    while !n.is_one() {
+        let p = sieve.generate(1);
         while (&n % p).is_zero() {
             f.push(p.clone());
             n /= p;
-
-            if n.is_one() {
-                return f;
-            }
         }
     }
 
